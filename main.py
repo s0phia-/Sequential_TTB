@@ -28,7 +28,9 @@ if __name__ == "__main__":
 
             # agent chooses an action, which is played
             action = agent.choose_action(available_actions)
+            print(available_actions[action])
             state_prime, reward, done, _ = env.step(action)
+            env.print_current_board()
 
             # env provides new actions for the agent to pick from, agent stores new knowledge and learns from it
             available_actions_prime = env.get_after_states()
