@@ -3,7 +3,7 @@ from sklearn.linear_model import LinearRegression, Ridge
 from agents.ttb_sequential import TakeTheBestSequential
 
 
-class Ttb_Q_values(TakeTheBestSequential):
+class TTB_Q_values(TakeTheBestSequential):
     def __init__(self, num_features, current_state):
         super().__init__(num_features, current_state)
 
