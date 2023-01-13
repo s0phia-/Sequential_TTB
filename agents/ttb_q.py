@@ -30,7 +30,12 @@ class TTB_Q_values(TakeTheBestSequential):
         """
         learn weight that, when multiplied by state features, indicate the cue ordering for choosing an action
         """
-        reg = LinearRegression(fit_intercept=False).fit(self.xx, self.yy)
+        x = self.xx
+        y = self.yy
+        # if len(y) > 10000:
+        #     x = x[-10000:, ]
+        #     y = y[-10000:]
+        reg = LinearRegression(fit_intercept=False).fit(x, y)
         self.beta = reg.coef_
 
     def feature_importance(self, state):
@@ -43,6 +48,7 @@ class TTB_Q_values(TakeTheBestSequential):
         """
         weighted_state_features = self.beta
         feature_importance = np.argsort(np.argsort(weighted_state_features))
-        return [5, 2, 1, 6, 7, 3, 0, 4]
-        # return feature_importance
+        print(feature_importance)
+        # [3 4 1 5 2 6 7 0] 20
+        return feature_importance
 
