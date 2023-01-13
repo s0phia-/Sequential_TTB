@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def game_over(writer, cleared_lines, agent, run_id, env, x):
     """
     game is over. Save stats and reset
@@ -42,15 +45,16 @@ def run_ttb_q(agent, env, num_episodes, writer, run_id):
             action = agent.choose_action(available_actions)
             state_prime, reward, done, _ = env.step(action)
             # env.render()
+            state = available_actions[action]
 
             # env provides new actions for the agent to pick from, agent stores new knowledge and learns from it
             available_actions_prime, _ = env.get_after_states(include_terminal=True)
-            agent.store_data(state, state_prime, reward, available_actions_prime, done)
-            agent.learn()
+            #agent.store_data(state, state_prime, reward, available_actions_prime, done)
+            #agent.learn()
 
             # update vars for the next loop
             cleared_lines += reward
-            print(cleared_lines)
+            print("cleared lines: " + str(cleared_lines))
             state = state_prime
             available_actions = available_actions_prime
         env, available_actions, _ = game_over(writer, cleared_lines, agent, run_id, env, x)
@@ -82,8 +86,8 @@ def run_ttb_rollouts(agent, env, num_episodes, writer, run_id):
         cleared_lines = 0
         while not done:
             # agent chooses an action, which is played
-            env.perform_rollouts(available_actions)
-            agent.store_data()
+            actions, returns = env.perform_rollouts(available_actions)
+            agent.store_data(actions, returns)
             agent.learn()
 
             action = agent.choose_action(available_actions)
