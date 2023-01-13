@@ -24,7 +24,7 @@ class TakeTheBestSequential(abc.ABC):
 
     def choose_action(self, actions):
         if random.random() > self.epsilon:
-            action_ix = random.choice(range(len(actions)))  # Todo
+            action_ix = random.choice(range(len(actions)))
             action = actions[action_ix]
         else:
             action_ix, action = self.ttb_action(self.feature_importance(self.current_state), actions)
@@ -47,14 +47,22 @@ class TakeTheBestSequential(abc.ABC):
         :param actions: actions to choose from
         :return: the best action, according to TTB
         """
-        for _ in range(self.num_features):
-            best_feature = np.argmax(feature_importance)
+        original_actions = actions
+        actions = np.unique(actions, axis=0)
+        feature_importance = np.array(feature_importance, dtype=float)
+        for i in range(self.num_features):
+            # TODO add in something for feature direction
+            best_feature = np.nanargmax(feature_importance)
             feature_values = [a[best_feature] for a in actions]
-            actions_arg_sort = np.unique(feature_values, return_inverse=1)[1]  # order the actions by their best feature
-            # if multiple actions are "best", keep looking, otherwise stop looking
-            if np.count_nonzero(actions_arg_sort) == self.num_features-1:
-                action_ix = np.argmin(actions_arg_sort)
+            if np.sum(feature_values == max(feature_values)) == 1:  # if there is 1 action with the max feature value
+                action_ix = np.argmax(feature_values)  # select that action. Otherwise keep looping through features
                 break
+            else:  # find the next best deciding feature, by deleting the old best. Only keep actions which were best
+                actions = actions[np.argwhere(feature_values == np.max(feature_values)).flatten()]
+
+                feature_importance[best_feature] = np.nan
         else:
             action_ix = np.random.choice(actions.shape[0])
-        return action_ix, actions[action_ix]
+        best_action = actions[action_ix]
+        whole_list_action_ix = int(np.where(np.all(original_actions == best_action, axis=1))[0][0])
+        return whole_list_action_ix, best_action
