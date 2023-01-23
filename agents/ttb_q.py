@@ -46,9 +46,9 @@ class TTB_Q_values(TakeTheBestSequential):
         :param state: a state to learn feature values for
         :return: a list with the relative importance of feature i in position i
         """
-        weighted_state_features = self.beta
-        feature_importance = np.argsort(np.argsort(weighted_state_features))
-        print(feature_importance)
+        feature_importance = np.argsort(np.argsort(self.beta))
         # [3 4 1 5 2 6 7 0] 20
         return feature_importance
+
+
 

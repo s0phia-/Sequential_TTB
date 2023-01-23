@@ -23,7 +23,3 @@ class TTB_validities(TakeTheBestSequential):
     def learn(self):
         data = np.transpose(self.xx)
         self.beta = [sum(data[i]) for i in range(len(data))]
-
-    def feature_importance(self, state):
-        feature_importance = np.argsort(np.argsort(self.beta))
-        return feature_importance
