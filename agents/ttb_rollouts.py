@@ -39,6 +39,18 @@ class TTB_Rollouts(TakeTheBestSequential):
         for i in range(self.num_features):
             self.beta[i] = pearsonr(y, x[:, i])[0]  # returns correlation ceof and p val, only want corr
 
-    def feature_importance(self, state):
-        feature_importance = np.argsort(np.argsort(self.beta))
-        return feature_importance
+
+class TTB_Conditional_Correlation(TTB_Rollouts):
+    def __init__(self, num_features, current_state):
+        super().__init__(num_features, current_state)
+
+    def learn(self, window_size=5000):
+        x = self.xx
+        y = self.yy
+        if len(y) < 20:  # must be length >=2 for correlation calc
+            return
+        # use sliding window
+        if len(y) > window_size:
+            x = x[-window_size:, ]
+            y = y[-window_size:]
+
