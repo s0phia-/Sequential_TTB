@@ -86,7 +86,7 @@ def run_ttb_rollouts(agent, env, num_episodes, writer, run_id):
         cleared_lines = 0
         while not done:
             # agent chooses an action, which is played
-            actions, returns = env.perform_rollouts(available_actions)
+            actions, returns = env.perform_rollouts(available_actions, agent.choose_action)
             agent.store_data(actions, returns)
             agent.learn()
 
