@@ -12,7 +12,7 @@ class TakeTheBestSequential(abc.ABC):
         # initialise learning feature importance
         self.xx = np.zeros([0, num_features])
         self.yy = np.zeros([0, 1])
-        self.beta = np.random.rand(num_features)
+        self.beta = np.zeros(num_features)
 
         # hyper-parameters
         self.gamma = 0.99  # discount factor
@@ -35,9 +35,9 @@ class TakeTheBestSequential(abc.ABC):
     def learn(self):
         pass
 
-    @abc.abstractmethod
     def feature_importance(self, state):
-        pass
+        feature_importance = np.argsort(np.argsort(self.beta))
+        return feature_importance
 
     def ttb_action(self, feature_importance, actions):
         """
