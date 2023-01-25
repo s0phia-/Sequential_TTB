@@ -79,16 +79,18 @@ def run_simple(agent, env, num_episodes, writer, run_id):
         game_over(writer, cleared_lines, agent, run_id, env, x)
 
 
-def run_ttb_rollouts(agent, env, num_episodes, writer, run_id):
+def run_ttb_rollouts(agent, env, num_episodes, writer, run_id, skip_learning=5):
     available_actions, _ = env.get_after_states(include_terminal=True)
     for x in range(num_episodes):
         done = False
         cleared_lines = 0
+        i = 0
         while not done:
             # agent chooses an action, which is played
             actions, returns = env.perform_rollouts(available_actions, agent.choose_action)
             agent.store_data(actions, returns)
-            agent.learn()
+            if i % skip_learning == 0:
+                agent.learn()
 
             action = agent.choose_action(available_actions)
             _, reward, done, _ = env.step(action)
@@ -100,4 +102,5 @@ def run_ttb_rollouts(agent, env, num_episodes, writer, run_id):
             # update vars for the next loop
             cleared_lines += reward
             print(cleared_lines)
+            i+=1
         env, available_actions, _ = game_over(writer, cleared_lines, agent, run_id, env, x)
