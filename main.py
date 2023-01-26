@@ -30,6 +30,3 @@ if __name__ == "__main__":
                     for agent_i in range(number_of_agents)]
 
     pool.starmap(pool_run, all_run_args)
-
-    # df = gather_data(results_file)
-    # plot_gg(df, "bottom")
