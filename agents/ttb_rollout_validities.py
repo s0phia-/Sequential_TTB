@@ -1,8 +1,8 @@
 import numpy as np
-from agents.ttb_rollouts import TTB_Rollouts
+from agents.ttb_rollouts import TTB_Rollouts_Correlation
 
 
-class TTB_Roll_Val(TTB_Rollouts):
+class TTB_Roll_Val(TTB_Rollouts_Correlation):
     def __init__(self, num_features, current_state):
         super().__init__(num_features, current_state)
 
@@ -56,7 +56,7 @@ class TTB_Roll_Val(TTB_Rollouts):
         self.beta = rr / (ww + rr)
 
 
-class TTB_Roll_Cond_Val(TTB_Rollouts):
+class TTB_Roll_Cond_Val(TTB_Rollouts_Correlation):
     def __init__(self, num_features, current_state):
         super().__init__(num_features, current_state)
 
