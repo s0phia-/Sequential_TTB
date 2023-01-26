@@ -3,7 +3,7 @@ from agents.ttb_sequential import TakeTheBestSequential
 from statistics import mean
 
 
-class TTB_validities(TakeTheBestSequential):
+class TtbValidities(TakeTheBestSequential):
     def __init__(self, num_features, current_state):
         super().__init__(num_features, current_state)
 
