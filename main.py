@@ -25,7 +25,7 @@ if __name__ == "__main__":
     agents = [TtbRRollCondVal, TtbRollVal, TtbRolloutsCorrelation]  # agents to try
     number_of_agents = 10  # number of agents to average performance over
     num_episodes = 30
-    tetris_cols = 20
+    tetris_cols = 15
 
     all_run_args = [[agent_name, agent_i, results_file, num_episodes, tetris_cols]
                     for agent_name in agents
