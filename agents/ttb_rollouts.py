@@ -3,7 +3,7 @@ from scipy.stats import pearsonr
 from agents.ttb_sequential import TakeTheBestSequential
 
 
-class TTB_Rollouts(TakeTheBestSequential):
+class TTB_Rollouts_Correlation(TakeTheBestSequential):
     def __init__(self, num_features, current_state):
         super().__init__(num_features, current_state)
 
