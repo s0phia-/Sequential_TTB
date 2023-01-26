@@ -17,13 +17,13 @@ def get_data(filepath):
     all_returns = pd.DataFrame()
 
     for csv_name in files:
-        csv_data = pd.read_csv(csv_name)
+        csv_data = pd.read_csv(filepath + '/' + csv_name)
         agent_class, agent_number = csv_name.split('_')
 
         n = len(csv_data)
         pd_data = pd.DataFrame({'agent': [agent_class] * n,
                                 'agent_number': [agent_number] * n,
-                                'episode': csv_data['step'],
+                                'episode': csv_data['episode_number'],
                                 'return': csv_data['return']})
 
         all_returns = pd.concat([all_returns, pd_data], axis=0)
@@ -48,6 +48,6 @@ def plot_gg(pd_df, legend_pos):
                  p9.geom_point() +
                  p9.theme_bw() +
                  p9.labs(x="Episode", y="Total Return", color="Model") +
-                 p9.theme(text=p9.element_text(size=20), legend_position=legend_pos)
+                 p9.theme(text=p9.element_text(size=9), legend_position=legend_pos)
                  ).draw(show=True, return_ggplot=True)
     return plot, fig
