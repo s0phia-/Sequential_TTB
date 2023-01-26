@@ -1,4 +1,6 @@
 import numpy as np
+from analysis.plot import gather_data, plot_gg, results_writer
+from tetris.game import Tetris
 
 
 def game_over(writer, cleared_lines, agent, run_id, env, x):
@@ -104,3 +106,32 @@ def run_ttb_rollouts(agent, env, num_episodes, writer, run_id, skip_learning=5):
             print(cleared_lines)
             i+=1
         env, available_actions, _ = game_over(writer, cleared_lines, agent, run_id, env, x)
+
+
+def pool_run(agent_class, i, results_path):
+    """
+
+    :param agent_class:
+    :param i:
+    :param results_path:
+    :return:
+    """
+    # write results to CSV files
+    filepath = f'{results_path}/{agent_class.__name__}_{i}.csv'
+    open_file, writer = results_writer(filepath, i)
+
+    # Create a tetris env with directed features
+    env = Tetris(10, 10, feature_directions=[-1, -1, -1, -1, -1, -1, 1, -1])
+    env.reset()
+
+    # create an agent (may need some info from the environment)
+    state = env.get_current_state_features()
+    agent = agent_class(env.num_features, state)
+
+    # set up play loop
+    num_episodes = 2
+
+    run_ttb_rollouts(agent, env, num_episodes, writer, run_id)
+
+    # stop writing to the csv file, plot results
+    open_file.close()

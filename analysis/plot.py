@@ -22,9 +22,8 @@ def gather_data(path_to_file):
     return df
 
 
-def results_writer(results_file):
+def results_writer(results_file, run_id):
     f = open(results_file, 'w')
     writer = csv.writer(f)
     writer.writerow(['step', 'return', 'agent', 'run_id'])
-    run_id = 'run' + str(time.time())
     return f, writer, run_id
