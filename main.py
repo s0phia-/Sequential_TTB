@@ -24,8 +24,9 @@ if __name__ == "__main__":
     # parameters
     agents = [TTB_Roll_Cond_Val, TTB_Roll_Val, TTB_Rollouts_Correlation]  # agents to try
     number_of_agents = 10  # number of agents to average performance over
+    num_episodes = 30
 
-    all_run_args = [[agent_name, agent_i, results_file]
+    all_run_args = [[agent_name, agent_i, results_file, num_episodes]
                     for agent_name in agents
                     for agent_i in range(number_of_agents)]
 

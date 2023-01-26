@@ -128,13 +128,14 @@ def run_ttb_rollouts(agent, env, num_episodes, writer, run_id, skip_learning=5):
         env, available_actions, _ = game_over(writer, cleared_lines, agent, run_id, env, x)
 
 
-def pool_run(agent_class, i, results_path):
+def pool_run(agent_class, i, results_path, num_episodes):
     """
     Need a separate run method for multi-processing. Runs a comparison of agents
 
     :param agent_class: class of agent being run. See full list imported in main
     :param i: agent index, for when multiple agents' performance is being averaged
     :param results_path: path to save results to
+    :param num_episodes: number of episodes to run an agent for
     """
     # write results to CSV files
     filepath = f'{results_path}/{agent_class.__name__}_{i}.csv'
@@ -149,8 +150,6 @@ def pool_run(agent_class, i, results_path):
     agent = agent_class(env.num_features, state)
 
     # set up play loop
-    num_episodes = 25
-
     run_ttb_rollouts(agent, env, num_episodes, writer, i)
 
     # stop writing to the csv file, plot results
