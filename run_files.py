@@ -1,5 +1,3 @@
-import numpy as np
-from analysis.analysis_methods import plot_gg
 from tetris.game import Tetris
 import csv
 
@@ -128,7 +126,7 @@ def run_ttb_rollouts(agent, env, num_episodes, writer, run_id, skip_learning=5):
         env, available_actions, _ = game_over(writer, cleared_lines, agent, run_id, env, x)
 
 
-def pool_run(agent_class, i, results_path, num_episodes):
+def pool_run(agent_class, i, results_path, num_episodes, tetris_cols):
     """
     Need a separate run method for multi-processing. Runs a comparison of agents
 
@@ -142,7 +140,7 @@ def pool_run(agent_class, i, results_path, num_episodes):
     open_file, writer = results_writer(filepath)
 
     # Create a tetris env with directed features
-    env = Tetris(10, 20, feature_directions=[-1, -1, -1, -1, -1, -1, 1, -1])
+    env = Tetris(10, tetris_cols, feature_directions=[-1, -1, -1, -1, -1, -1, 1, -1])
     env.reset()
 
     # create an agent (may need some info from the environment)
