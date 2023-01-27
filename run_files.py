@@ -90,7 +90,7 @@ def run_simple(agent, env, num_episodes, writer, run_id):
         cleared_lines = 0
         while not done:
             # env.print_current_tetromino()  ##
-            after_state_features = env.get_after_states()
+            after_state_features, _ = env.get_after_states()
             i = agent.choose_action(after_state_features)
             # print(after_state_features[i])
             observation, reward, done, _ = env.step(i)
@@ -106,10 +106,10 @@ def run_ttb_rollouts(agent, env, num_episodes, writer, run_id, skip_learning=5):
         cleared_lines = 0
         i = 0
         while not done:
-            # agent chooses an action, which is played
-            actions, returns = env.perform_rollouts(available_actions, agent.choose_action)
-            agent.store_data(actions, returns)
             if i % skip_learning == 0:
+                # agent chooses an action, which is played
+                actions, returns = env.perform_rollouts(available_actions, agent.choose_action)
+                agent.store_data(actions, returns)
                 agent.learn()
 
             action = agent.choose_action(available_actions)
