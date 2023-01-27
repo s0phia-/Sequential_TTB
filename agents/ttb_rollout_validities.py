@@ -30,7 +30,7 @@ class TtbRollVal(TtbRolloutsCorrelation):
         self.xx = np.r_[self.xx, feature_is_max]
         self.yy = np.append(self.yy, best_rollout_returns)
 
-    def learn(self, window_size=5000):
+    def learn(self, window_size=5000000000000):
         """
         find feature validities using equation rr/(rr+ww) where ww is wrong decisions and rr is correct decisions.
         This equation for validity is from https://www.researchgate.net/publication/23753521_One-reason_decision_making
