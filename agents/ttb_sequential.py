@@ -66,3 +66,15 @@ class TakeTheBestSequential(abc.ABC):
         best_action = actions[action_ix]
         whole_list_action_ix = int(np.where(np.all(original_actions == best_action, axis=1))[0][0])
         return whole_list_action_ix, best_action
+
+
+class TTBFixedWeights(TakeTheBestSequential):
+    def __init__(self, num_features, current_state):
+        super().__init__(num_features, current_state)
+        self.beta = [8, 7, 6, 5, 4, 3, 2, 1]
+
+    def learn(self):
+        pass
+
+    def store_data(self, *args):
+        pass
