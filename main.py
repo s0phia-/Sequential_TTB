@@ -27,8 +27,8 @@ if __name__ == "__main__":
     # parameters
     agents = [[StateDependent, run_ttb_q_seq]]  # agents to try
 
-    number_of_agents = 3  # number of agents to average performance over
-    num_episodes = 30
+    number_of_agents = 15  # number of agents to average performance over
+    num_episodes = 10000
     tetris_cols = 5
     tetris_rows = 5
 
