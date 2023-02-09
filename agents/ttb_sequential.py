@@ -17,6 +17,7 @@ class TakeTheBestSequential(abc.ABC):
         # hyper-parameters
         self.gamma = 0.99  # discount factor
         self.epsilon = 0.9
+        self.alpha = .1
 
     @abc.abstractmethod
     def store_data(self, *args):
