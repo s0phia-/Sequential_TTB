@@ -1,14 +1,18 @@
-from analysis_methods import plot_gg, average_over_runs, get_data
+from analysis_methods import plot_gg, tidy_data_episodes, get_data, tidy_data_steps, plot_scatter
 
-file_path = "../results/hex_run_1"
+file_path = "../results/test"
 
 data = get_data(file_path)
-data = average_over_runs(data)
+ep_data = tidy_data_episodes(data)
 
-plot_gg(data, "right")
+plot_gg(ep_data, "right")
 
-plot, fig = plot_gg(data, "bottom")
-fig.savefig('image1.png', dpi=300, bbox_inches='tight')
+step_data = tidy_data_steps(data)
 
-plot, fig = plot_gg(data, "none")
-fig.savefig('image2.png', dpi=300, bbox_inches='tight')
+plot_scatter(step_data, "right")
+
+# plot, fig = plot_gg(data, "bottom")
+# fig.savefig('image1.png', dpi=300, bbox_inches='tight')
+#
+# plot, fig = plot_gg(data, "none")
+# fig.savefig('image2.png', dpi=300, bbox_inches='tight')
