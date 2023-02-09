@@ -39,7 +39,6 @@ def tidy_data_episodes(data: pandas.DataFrame):
     :param data: results data
     :return: averaged results data
     """
-    # TODO take max return per episode
     episodic_data = data.groupby(['agent', 'agent_number', 'episode'])['return'].max().reset_index()
     av_data = episodic_data.groupby(['agent', 'episode'])['return'].mean().reset_index()
     return av_data
