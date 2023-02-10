@@ -125,12 +125,11 @@ def run_ttb_q_seq(agent, env, num_episodes, writer, run_id, skip_learning=1):
         available_actions, _ = env.get_after_states(include_terminal=True)
         done = False
         cleared_lines = 0
-        i = 0
         step = 0
 
         while not done:
             state = env.get_current_state_features()
-            if i % skip_learning == 0:
+            if step % skip_learning == 0:
                 # agent chooses an action, which is played
                 actions, rewards = env.perform_rollouts(available_actions, agent.choose_action, length=1, n=3)
                 agent.learn(state, actions, rewards)
@@ -146,8 +145,9 @@ def run_ttb_q_seq(agent, env, num_episodes, writer, run_id, skip_learning=1):
             # update vars for the next loop
             cleared_lines += reward
             print(cleared_lines)
-            i += 1
             writer.writerow([ep, step, cleared_lines, type(agent).__name__, run_id])
+            if cleared_lines >= 1000:
+                break
         env.reset()
         available_actions, actions_inc_terminal = env.get_after_states(include_terminal=True)
 
