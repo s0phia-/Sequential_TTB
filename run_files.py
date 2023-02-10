@@ -132,7 +132,7 @@ def run_ttb_q_seq(agent, env, num_episodes, writer, run_id, skip_learning=1):
             state = env.get_current_state_features()
             if i % skip_learning == 0:
                 # agent chooses an action, which is played
-                actions, rewards = env.perform_rollouts(available_actions, agent.choose_action)
+                actions, rewards = env.perform_rollouts(available_actions, agent.choose_action, length=1, n=3)
                 agent.learn(state, actions, rewards)
 
             action = agent.choose_action(available_actions)
