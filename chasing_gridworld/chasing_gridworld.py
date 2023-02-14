@@ -19,12 +19,12 @@ class ChasingGridWorld:
         :return: agent and monster's new positions
         """
         def random_grid_position(class_self):  # get a random grid position
-            return [random.randint(class_self.num_rows), random.randint(class_self.num_cols)]
+            return np.array((random.randint(0, class_self.num_rows-1), random.randint(0, class_self.num_cols-1)))
 
         self.agent_position = random_grid_position(self)
         self.monster_position = random_grid_position(self)
 
-        while self.monster_position == self.agent_position:  # make sure monster and agent positions are not same
+        while (self.monster_position == self.agent_position).all():  # ensure monster and agent positions are not same
             self.monster_position = random_grid_position(self)
 
         return self.agent_position, self.monster_position
@@ -36,9 +36,10 @@ class ChasingGridWorld:
         :param action: the [x, y] directions the agent should move in
         :return: the state with the agent's and monster's new position
         """
+        # TODO: make sure action stays in bounds
         self.agent_position += action
 
-        if self.agent_position == self.monster_position:  # if the move takes the agent into the monster
+        if (self.agent_position == self.monster_position).all():  # if the move takes the agent into the monster
             done = True
             reward = -100
             state = self.get_state()
@@ -47,7 +48,7 @@ class ChasingGridWorld:
         if random.uniform(0, 1) < self.random_monster:  # if the monster behaves randomly
             monster_action_x = random.randint(0, 1)
             monster_action_y = 1 - monster_action_x
-            monster_action = [monster_action_x, monster_action_y]
+            monster_action = (monster_action_x, monster_action_y)
 
         else:  # monster chases the agent - it moves 1 square towards the agent on the axis with the biggest difference
             diff = self.agent_position - self.monster_position
@@ -56,11 +57,12 @@ class ChasingGridWorld:
             monster_action[biggest_diff_axis] = diff[biggest_diff_axis] / abs(diff[biggest_diff_axis])  # gets +/- 1
 
         # move the monster and find updated state
-        self.monster_position += monster_action
+        # TODO: make sure agent stays in bounds
+        self.monster_position += np.array(monster_action, dtype=int)
         state = self.get_state()
 
         # if the agent and monster share a location, the game is over
-        if self.agent_position == self.monster_position:
+        if (self.agent_position == self.monster_position).all():
             done = True
             reward = -100
         else:
@@ -73,9 +75,9 @@ class ChasingGridWorld:
         """
         Print a grid with 0s everywhere except 1 in the agent's position and 2 in the monster's position
         """
-        grid = np.zeros(self.num_rows, self.num_cols)
-        grid[self.agent_position] = 1
-        grid[self.monster_position] = 2
+        grid = np.zeros([self.num_rows, self.num_cols])
+        grid[self.agent_position[0], self.agent_position[1]] = 1
+        grid[self.monster_position[0], self.monster_position[1]] = 2
         print(grid)
 
     def get_state(self):
