@@ -1,4 +1,5 @@
 from tetris.game import Tetris
+from chasing_gridworld.chasing_gridworld import ChasingGridWorld, ChasingGridWorldAfterStates
 import csv
 
 
@@ -130,11 +131,12 @@ def run_ttb_q_seq(agent, env, num_episodes, writer, run_id, skip_learning=1):
         while not done:
             state = env.get_current_state_features()
             if step % skip_learning == 0:
-                # agent chooses an action, which is played
-                actions, rewards = env.perform_rollouts(available_actions, agent.choose_action, length=1, n=3)
+                actions, rewards = env.perform_rollouts(available_actions, agent.choose_action, length=1, n=1)
                 agent.learn(state, actions, rewards)
 
-            action = agent.choose_action(available_actions)
+            # action = agent.choose_action(available_actions)
+            action_afterstate = agent.choose_action(available_actions)
+            action = env.get_action_from_afterstate(action_afterstate)
             _, reward, done, _ = env.step(action)
             step += 1
             # env.render()
@@ -152,7 +154,7 @@ def run_ttb_q_seq(agent, env, num_episodes, writer, run_id, skip_learning=1):
         available_actions, actions_inc_terminal = env.get_after_states(include_terminal=True)
 
 
-def pool_run(agent_class, i, results_path, num_episodes, tetris_cols, tetris_rows, play_loop):
+def pool_run(agent_class, i, results_path, num_episodes, rows, cols, play_loop):
     """
     Need a separate run method for multi-processing. Runs a comparison of agents
 
@@ -166,7 +168,8 @@ def pool_run(agent_class, i, results_path, num_episodes, tetris_cols, tetris_row
     open_file, writer = results_writer(filepath)
 
     # Create a tetris env with directed features
-    env = Tetris(tetris_rows, tetris_cols, feature_directions=[-1, -1, -1, -1, -1, -1, 1, -1])
+    # env = Tetris(tetris_rows, tetris_cols, feature_directions=[-1, -1, -1, -1, -1, -1, 1, -1])
+    env = ChasingGridWorldAfterStates(rows, cols)
     env.reset()
 
     # create an agent (may need some info from the environment)

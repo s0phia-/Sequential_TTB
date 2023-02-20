@@ -27,12 +27,12 @@ if __name__ == "__main__":
     # parameters
     agents = [[StateDependent, run_ttb_q_seq]]  # agents to try
 
-    number_of_agents = 15  # number of agents to average performance over
-    num_episodes = 10**5
-    tetris_cols = 5
-    tetris_rows = 5
+    number_of_agents = 1  # number of agents to average performance over
+    num_episodes = 10**2
+    rows = 5
+    cols = 5
 
-    all_run_args = [[agent_name, agent_i, results_file, num_episodes, tetris_cols, tetris_rows, play_loop]
+    all_run_args = [[agent_name, agent_i, results_file, num_episodes, rows, cols, play_loop]
                     for agent_name, play_loop in agents
                     for agent_i in range(number_of_agents)]
 
