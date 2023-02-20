@@ -11,8 +11,10 @@ class ChasingGridWorld:
         self.num_cols = cols
         self.num_rows = rows
         self.agent_position, self.monster_position = self.reset()
+        self.num_features = 8
         self.state = self.get_state()
         self.random_monster = .1
+        self.loss_reward = -100
 
     def reset(self):
         """
@@ -60,7 +62,7 @@ class ChasingGridWorld:
 
         if (self.agent_position == self.monster_position).all():  # if the move takes the agent into the monster
             done = True  # game is over
-            reward = -100
+            reward = self.loss_reward
             state = self.get_state()
             return state, reward, done, ""
 
@@ -74,7 +76,7 @@ class ChasingGridWorld:
         # if the agent and monster share a location, the game is over
         if (self.agent_position == self.monster_position).all():
             done = True
-            reward = -100
+            reward = self.loss_reward
         else:
             done = False
             reward = 1
@@ -113,8 +115,72 @@ class ChasingGridWorld:
         monster_y - agent_y
         :return: current state
         """
-        state = np.zeros(4)
+        state = np.zeros(self.num_features)
         state[0:2] = self.agent_position - self.monster_position
         state[2:4] = self.monster_position - self.agent_position
+        state[4:6] = self.agent_position
+        state[6:8] = self.monster_position
         self.state = state
         return state
+
+
+class ChasingGridWorldAfterStates(ChasingGridWorld):
+    def __init__(self, cols, rows):
+        super().__init__(cols, rows)
+        self.afterstate_mapping = None
+
+    def get_after_states(self, include_terminal=False):
+        possile_actions = [[0, 1], [0, -1], [1, 0], [-1, 0]]
+        afterstates = {}
+        rewards = []
+        agent_position, monster_position = self.agent_position, self.monster_position
+        for a in possile_actions:
+            afterstate, reward, done, _ = self.step(a)
+            if include_terminal or not done:
+                afterstates[tuple(a)] = afterstate
+                rewards.append(reward)
+            self.agent_position, self.monster_position = agent_position, monster_position
+        self.afterstate_mapping = afterstates
+        return afterstates.items(), rewards
+
+    def get_current_state_features(self):
+        return self.get_state()
+
+    def get_action_from_afterstate(self, afterstate):
+        """
+        Given afterstate features, find the action that lead to it. If multiple actions, return one at random
+        :return: an action that lead to the given afterstate
+        """
+        actions = [k for k, v in self.afterstate_mapping.items() if v == afterstate]
+        action = random.choice(actions)
+        return action
+
+    def single_rollout(self, action, policy_function, length):
+        reset_agent_position, reset_monster_position = self.agent_position, self.monster_position
+        if (self.monster_position == self.agent_position).all():
+            return self.loss_reward
+        _, _, done, _ = self.step(action)
+        if done:
+            self.agent_position, self.monster_position = reset_agent_position, reset_monster_position
+            return self.loss_reward
+        rollout_return = 0
+        for _ in range(length-1):
+            action = policy_function(self.get_after_states(include_terminal=True)[0])
+            _, reward, done, _ = self.step(action)
+            rollout_return += reward
+            if done:
+                rollout_return = self.loss_reward
+                break
+        self.agent_position, self.monster_position = reset_agent_position, reset_monster_position
+        return rollout_return
+
+    def perform_rollouts(self, actions, policy_function, length=5, n=5):
+        rollout_actions = []
+        rollout_returns = []
+        for action in range(len(actions)):
+            action_all_returns = []
+            for i in range(n):  # do n rollouts,
+                action_all_returns.append(self.single_rollout(action, policy_function, length))
+            rollout_actions.append(actions[action])
+            rollout_returns.append(np.mean(action_all_returns))  # save the mean of the rollout returns
+        return rollout_actions, rollout_returns
