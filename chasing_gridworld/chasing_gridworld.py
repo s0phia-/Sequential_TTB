@@ -1,5 +1,6 @@
 import numpy as np
 import random
+from copy import deepcopy
 
 
 class ChasingGridWorld:
@@ -11,9 +12,9 @@ class ChasingGridWorld:
         self.num_cols = cols
         self.num_rows = rows
         self.agent_position, self.monster_position = self.reset()
-        self.num_features = 8
+        self.num_features = 4
         self.state = self.get_state()
-        self.random_monster = .1
+        self.random_monster = .15
         self.loss_reward = -100
 
     def reset(self):
@@ -94,7 +95,6 @@ class ChasingGridWorld:
             biggest_diff_axis = np.argmax([abs(diff)])
             monster_action = [0, 0]
             monster_action[biggest_diff_axis] = diff[biggest_diff_axis] / abs(diff[biggest_diff_axis])  # gets +/- 1
-
         return monster_action
 
     def render(self):
@@ -116,10 +116,11 @@ class ChasingGridWorld:
         :return: current state
         """
         state = np.zeros(self.num_features)
-        state[0:2] = self.agent_position - self.monster_position
-        state[2:4] = self.monster_position - self.agent_position
-        state[4:6] = self.agent_position
-        state[6:8] = self.monster_position
+        # state[0:2] = self.agent_position - self.monster_position
+        # state[2:4] = self.monster_position - self.agent_position
+        state[0:2] = self.agent_position
+        state[2:4] = self.monster_position
+        state = tuple(state)
         self.state = state
         return state
 
@@ -133,15 +134,16 @@ class ChasingGridWorldAfterStates(ChasingGridWorld):
         possile_actions = [[0, 1], [0, -1], [1, 0], [-1, 0]]
         afterstates = {}
         rewards = []
-        agent_position, monster_position = self.agent_position, self.monster_position
+        agent_position, monster_position = tuple(self.agent_position), tuple(self.monster_position)
         for a in possile_actions:
             afterstate, reward, done, _ = self.step(a)
             if include_terminal or not done:
                 afterstates[tuple(a)] = afterstate
                 rewards.append(reward)
-            self.agent_position, self.monster_position = agent_position, monster_position
+            self.agent_position, self.monster_position = np.array(agent_position), np.array(monster_position)
         self.afterstate_mapping = afterstates
-        return afterstates.items(), rewards
+
+        return list(afterstates.values()), rewards
 
     def get_current_state_features(self):
         return self.get_state()
@@ -151,12 +153,12 @@ class ChasingGridWorldAfterStates(ChasingGridWorld):
         Given afterstate features, find the action that lead to it. If multiple actions, return one at random
         :return: an action that lead to the given afterstate
         """
-        actions = [k for k, v in self.afterstate_mapping.items() if v == afterstate]
+        actions = [k for k, v in self.afterstate_mapping.items() if (v == afterstate).all()]
         action = random.choice(actions)
         return action
 
     def single_rollout(self, action, policy_function, length):
-        reset_agent_position, reset_monster_position = self.agent_position, self.monster_position
+        reset_agent_position, reset_monster_position = deepcopy(self.agent_position), deepcopy(self.monster_position)
         if (self.monster_position == self.agent_position).all():
             return self.loss_reward
         _, _, done, _ = self.step(action)
