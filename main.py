@@ -28,9 +28,9 @@ if __name__ == "__main__":
     agents = [[StateDependent, run_ttb_q_seq]]  # agents to try
 
     number_of_agents = 1  # number of agents to average performance over
-    num_episodes = 10**2
-    rows = 5
-    cols = 5
+    num_episodes = 10**5
+    rows = 10
+    cols = 10
 
     all_run_args = [[agent_name, agent_i, results_file, num_episodes, rows, cols, play_loop]
                     for agent_name, play_loop in agents

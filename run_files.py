@@ -135,7 +135,7 @@ def run_ttb_q_seq(agent, env, num_episodes, writer, run_id, skip_learning=1):
                 agent.learn(state, actions, rewards)
 
             # action = agent.choose_action(available_actions)
-            action_afterstate = agent.choose_action(available_actions)
+            action_afterstate = available_actions[agent.choose_action(available_actions)]  # TODO: this is janky
             action = env.get_action_from_afterstate(action_afterstate)
             _, reward, done, _ = env.step(action)
             step += 1
@@ -152,6 +152,40 @@ def run_ttb_q_seq(agent, env, num_episodes, writer, run_id, skip_learning=1):
                 break
         env.reset()
         available_actions, actions_inc_terminal = env.get_after_states(include_terminal=True)
+
+
+def run_q(agent, env, num_episodes, results_path):
+
+    # save episode, step and return
+    filepath = f'{results_path}/q_learning_returns.csv'
+    with open(filepath, 'w') as f:
+        writer = csv.writer(f)
+        writer.writerow(['episode_number', 'step', 'return'])
+
+        # q learning loop
+        for ep in range(num_episodes):
+            done = False
+            step = 0
+            total_return = 0
+            while not done:
+                state = env.get_state()
+                action = agent.choose_action(state)
+                state_, reward, done, _ = env.step(action)
+                agent.learn(state, action, reward, state_)
+                step += 1
+                total_return += reward
+                writer.writerow([ep, step, total_return])
+                if step > 1000:
+                    break
+            env.reset()
+
+    # save Q table
+    learned_q_table = agent.qq
+    filepath = f'{results_path}/q_table.csv'
+    with open(filepath, 'w') as f:
+        writer = csv.writer(f)
+        for k, v in learned_q_table.items():
+            writer.writerow([k, v])
 
 
 def pool_run(agent_class, i, results_path, num_episodes, rows, cols, play_loop):
