@@ -40,31 +40,31 @@ class TakeTheBestSequential(abc.ABC):
         feature_importance = np.argsort(np.argsort(self.beta))
         return feature_importance
 
-    def ttb_action(self, feature_importance, actions):
+    def ttb_action(self, feature_importance, after_states):
         """
         implements the ttb heuristic for action selection
 
         :param feature_importance: a ranking of the importance of features
-        :param actions: actions to choose from
+        :param after_states: actions to choose from
         :return: the best action, according to TTB
         """
-        original_actions = actions
-        actions = np.unique(actions, axis=0)
+        original_actions = after_states
+        after_states = np.unique(after_states, axis=0)
         feature_importance = np.array(feature_importance, dtype=float)
         for i in range(self.num_features):
             # TODO add in something for feature direction
             best_feature = np.nanargmax(feature_importance)
-            feature_values = [a[best_feature] for a in actions]
+            feature_values = [a[best_feature] for a in after_states]
             if np.sum(feature_values == max(feature_values)) == 1:  # if there is 1 action with the max feature value
                 action_ix = np.argmax(feature_values)  # select that action. Otherwise keep looping through features
                 break
-            else:  # find the next best deciding feature, by deleting the old best. Only keep actions which were best
-                actions = actions[np.argwhere(feature_values == np.max(feature_values)).flatten()]
+            else:  # find the next best deciding feature - delete previous best. Only keep after_states which were best
+                after_states = after_states[np.argwhere(feature_values == np.max(feature_values)).flatten()]
 
                 feature_importance[best_feature] = np.nan
         else:
-            action_ix = np.random.choice(actions.shape[0])
-        best_action = actions[action_ix]
+            action_ix = np.random.choice(after_states.shape[0])
+        best_action = after_states[action_ix]
         whole_list_action_ix = int(np.where(np.all(original_actions == best_action, axis=1))[0][0])
         return whole_list_action_ix, best_action
 

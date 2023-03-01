@@ -84,7 +84,7 @@ class TtbRolloutsSummingScore(TakeTheBestSequential):
         #
         # feature_value = []
         # for feature_ix in range(self.num_features):
-        #     # sum the rollout outcomes for actions feature i would have selected using TTB
+        #     # sum the rollout outcomes for after_states feature i would have selected using TTB
         #     sum_tx = np.sum(
         #         np.take(y, np.argwhere(np.array(x[feature_ix]) == 1).flatten(), axis=0), axis=0)
         #     feature_value.append(sum_tx)
