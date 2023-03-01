@@ -14,7 +14,7 @@ class ChasingGridWorld:
         self.agent_position, self.monster_position = self.reset()
         self.num_features = 4
         self.state = self.get_state()
-        self.random_monster = .15
+        self.random_monster = 0
         self.loss_reward = -100
 
     def reset(self):
@@ -24,7 +24,8 @@ class ChasingGridWorld:
         """
 
         def random_grid_position(class_self):  # get a random grid position
-            return np.array((random.randint(0, class_self.num_rows - 1), random.randint(0, class_self.num_cols - 1)))
+            x, y = random.randint(0, class_self.num_rows - 1), random.randint(0, class_self.num_cols - 1)
+            return np.array((float(x), float(y)))
 
         self.agent_position = random_grid_position(self)
         self.monster_position = random_grid_position(self)
@@ -41,14 +42,13 @@ class ChasingGridWorld:
         :param action: the [x, y] directions the agent should move in
         :return: the state with the agent's and monster's new position
         """
-
         def check_action_valid(which_agent, act, class_self=self):
             if which_agent == "agent":
                 position = class_self.agent_position
             elif which_agent == "monster":
                 position = class_self.monster_position
             else:
-                return "invalid which agent"
+                return "invalid which_agent"
             # check whether the action moves the agent/monster outside the bounds of the grid
             if (position + np.array(act, dtype=int) >= [class_self.num_rows, class_self.num_cols]).any() \
                     or (position + np.array(act, dtype=int) < [0, 0]).any():
@@ -150,7 +150,7 @@ class ChasingGridWorldAfterStates(ChasingGridWorld):
 
     def get_action_from_afterstate(self, afterstate):
         """
-        Given afterstate features, find the action that lead to it. If multiple actions, return one at random
+        Given afterstate features, find the action that lead to it. If multiple after_states, return one at random
         :return: an action that lead to the given afterstate
         """
         actions = [k for k, v in self.afterstate_mapping.items() if (v == afterstate).all()]

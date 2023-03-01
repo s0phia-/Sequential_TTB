@@ -1,6 +1,6 @@
 from analysis_methods import plot_gg, tidy_data_episodes, get_data, tidy_data_steps, plot_scatter
 
-file_path = "../results/test"
+file_path = "../results/dunno"
 
 data = get_data(file_path)
 ep_data = tidy_data_episodes(data)

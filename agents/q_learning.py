@@ -8,17 +8,17 @@ class QLearning:
     def __init__(self, num_features, actions=None):
         self.num_features = num_features
         self.actions = actions
-        self.alpha = .1
+        self.alpha = 1
         self.gamma = .95
         self.epsilon = .15
-        self.qq = defaultdict(lambda: np.zeros(4))  # 4 actions
+        self.qq = defaultdict(lambda: np.zeros(4))  # 4 after_states
 
     def choose_action(self, state, actions=None):
         """
         choose the action using epsilon greedy
         :param state: current state
-        :param actions: use this if the actions change per state. If the actions are always the same it's cleaner to
-        init actions when making class
+        :param actions: use this if the after_states change per state. If the after_states are always the same it's cleaner to
+        init after_states when making class
         :return: action selected by epsilon greedy
         """
         if actions is None:

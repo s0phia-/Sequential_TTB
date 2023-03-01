@@ -28,7 +28,7 @@ def run_ttb_val(agent, env, num_episodes, writer, run_id):
             step += 1
             # env.render()
 
-            # env provides new actions for the agent to pick from, agent stores new knowledge and learns from it
+            # env provides new after_states for the agent to pick from, agent stores new knowledge and learns from it
             available_actions_prime, _ = env.get_after_states(include_terminal=True)
             agent.store_data(action, available_actions, reward)
             agent.learn()
@@ -55,7 +55,7 @@ def run_ttb_q(agent, env, num_episodes, writer, run_id):
             # env.render()
             state = available_actions[action]
 
-            # env provides new actions for the agent to pick from, agent stores new knowledge and learns from it
+            # env provides new after_states for the agent to pick from, agent stores new knowledge and learns from it
             available_actions_prime, _ = env.get_after_states(include_terminal=True)
             agent.store_data(state, state_prime, reward, available_actions_prime, done)
             agent.learn()
@@ -77,12 +77,15 @@ def run_simple(agent, env, num_episodes, writer, run_id):
         done = False
         cleared_lines = 0
         step = 0
+        state = env.get_state()
         while not done:
             # env.print_current_tetromino()  ##
             after_state_features, _ = env.get_after_states()
-            i = agent.choose_action(after_state_features)
+            print('state', state, 'afterstates', after_state_features)
+            i = agent.choose_action(state, after_state_features)
             # print(after_state_features[i])
-            observation, reward, done, _ = env.step(i)
+            #print(i)
+            state, reward, done, _ = env.step(i)
             step += 1
             # env.render()  ##
             cleared_lines += reward
@@ -109,7 +112,7 @@ def run_ttb_rollouts(agent, env, num_episodes, writer, run_id, skip_learning=1):
             step += 1
             # env.render()
 
-            # env provides new actions for the agent to pick from
+            # env provides new after_states for the agent to pick from
             available_actions, _ = env.get_after_states(include_terminal=True)
 
             # update vars for the next loop
@@ -141,7 +144,7 @@ def run_ttb_q_seq(agent, env, num_episodes, writer, run_id, skip_learning=1):
             step += 1
             # env.render()
 
-            # env provides new actions for the agent to pick from
+            # env provides new after_states for the agent to pick from
             available_actions, _ = env.get_after_states(include_terminal=True)
 
             # update vars for the next loop
@@ -185,7 +188,7 @@ def run_q(agent, env, num_episodes, results_path):
     with open(filepath, 'w') as f:
         writer = csv.writer(f)
         for k, v in learned_q_table.items():
-            writer.writerow([k, v])
+            writer.writerow([k, v[0], v[1], v[2], v[3]])
 
 
 def pool_run(agent_class, i, results_path, num_episodes, rows, cols, play_loop):

@@ -13,7 +13,7 @@ class TtbQValues(TakeTheBestSequential):
         :param state: current state
         :param state_prime: action selected
         :param reward: reward received from environment
-        :param actions_prime: possible actions from state_prime
+        :param actions_prime: possible after_states from state_prime
         """
         # update target
         if done:
