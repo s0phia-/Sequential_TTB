@@ -9,7 +9,7 @@ class QLearning:
         self.num_features = num_features
         self.actions = actions
         self.alpha = 1
-        self.gamma = .95
+        self.gamma = .9
         self.epsilon = .15
         self.qq = defaultdict(lambda: np.zeros(4))  # 4 after_states
 
@@ -51,3 +51,37 @@ class QLearning:
         qq_s_a = self.qq[state][action]
         update = self.alpha * (reward + self.gamma * max_qq_s_ - qq_s_a)
         self.qq[state][action] += update
+
+
+class TDLearning(QLearning):
+    """
+    Simplest TD learning algorithm
+    """
+    def __init__(self, num_features, actions=None):
+        super().__init__(num_features, actions)
+        #self.vv = defaultdict(lambda: 1)
+
+    def vv(self, x):
+        return -4 * x[2] - x[4] - x[5] - x[1] - x[3] + x[6]
+
+    def learn(self, state, reward, state_, done):
+        state, state_ = tuple(state), tuple(state_)
+        if done:
+            self.vv[state_] = -100
+        update = self.alpha * (reward + self.gamma * self.vv[state_] - self.vv[state])
+        self.vv[state] += update
+
+    def choose_action(self, state, afterstates):
+        """
+        choose the action using epsilon greedy
+        :param state: current state
+        :param actions: use this if the actions change per state. If the actions are always the same it's
+        cleaner to init after_states when making class
+        :return: action selected by epsilon greedy
+        """
+        afterstates = [tuple(a) for a in afterstates]
+        if random.uniform(0, 1) < self.epsilon:
+            action = random.randint(0, len(afterstates)-1)
+        else:
+            action = self.argmax([self.vv(a) for a in afterstates])
+        return action
