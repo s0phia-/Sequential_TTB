@@ -1,5 +1,6 @@
 from tetris.game import Tetris
 from chasing_gridworld.chasing_gridworld import ChasingGridWorld, ChasingGridWorldAfterStates
+from chasing_gridworld.simpler_gridworld import SimpleGridworldAfterStates
 import csv
 
 
@@ -81,15 +82,15 @@ def run_simple(agent, env, num_episodes, writer, run_id):
         while not done:
             # env.print_current_tetromino()  ##
             after_state_features, _ = env.get_after_states()
-            print('state', state, 'afterstates', after_state_features)
             i = agent.choose_action(state, after_state_features)
-            # print(after_state_features[i])
-            #print(i)
             state, reward, done, _ = env.step(i)
             step += 1
             # env.render()  ##
             cleared_lines += reward
             writer.writerow([ep, step, cleared_lines, type(agent).__name__, run_id])
+            if step > 1000:
+                break
+        print(cleared_lines)
         env.reset()
 
 
@@ -191,6 +192,49 @@ def run_q(agent, env, num_episodes, results_path):
             writer.writerow([k, v[0], v[1], v[2], v[3]])
 
 
+def run_v(agent, env, num_episodes, results_path):
+
+    # save episode, step and return
+    filepath = f'{results_path}/v_learning_returns.csv'
+
+    def save_vv_table(learned_v_table, results_path):
+        filepath = f'{results_path}/v_table.csv'
+        with open(filepath, 'w') as f:
+            writer = csv.writer(f)
+            for k, v in learned_v_table.items():
+                writer.writerow([k, v])
+
+    with open(filepath, 'w') as f:
+        writer = csv.writer(f)
+        writer.writerow(['episode_number', 'step', 'return'])
+
+        # value iteration learning loop
+        for ep in range(num_episodes):
+            done = False
+            step = 0
+            total_return = 0
+            while not done:
+                state = env.get_state()
+                afterstates, _ = env.get_after_states()
+                afterstate_ix = agent.choose_action(state, afterstates)
+                state_, reward, done, _ = env.step(afterstate_ix)
+                step += 1
+                total_return += reward
+
+                reward = -1 + reward
+                if done:
+                    print(total_return)
+
+                # agent.learn(state, reward, state_, done)
+                writer.writerow([ep, step, total_return])
+                # if ep % 10**3 == 0:
+                #     save_vv_table(agent.vv, results_path)
+                if step > 1000:
+                    print(total_return)
+                    break
+            env.reset()
+
+
 def pool_run(agent_class, i, results_path, num_episodes, rows, cols, play_loop):
     """
     Need a separate run method for multi-processing. Runs a comparison of agents
@@ -205,12 +249,13 @@ def pool_run(agent_class, i, results_path, num_episodes, rows, cols, play_loop):
     open_file, writer = results_writer(filepath)
 
     # Create a tetris env with directed features
-    # env = Tetris(tetris_rows, tetris_cols, feature_directions=[-1, -1, -1, -1, -1, -1, 1, -1])
-    env = ChasingGridWorldAfterStates(rows, cols)
+    env = Tetris(rows, cols, feature_directions=[-1, -1, -1, -1, -1, -1, 1, -1])
+    # env = Tetris(rows, cols)
+    # env = Tetris(rows, cols)
     env.reset()
 
     # create an agent (may need some info from the environment)
-    state = env.get_current_state_features()
+    state = env.get_state()
     agent = agent_class(env.num_features, state)
 
     # set up play loop
