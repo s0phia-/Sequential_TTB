@@ -145,9 +145,6 @@ class ChasingGridWorldAfterStates(ChasingGridWorld):
 
         return list(afterstates.values()), rewards
 
-    def get_current_state_features(self):
-        return self.get_state()
-
     def get_action_from_afterstate(self, afterstate):
         """
         Given afterstate features, find the action that lead to it. If multiple after_states, return one at random
