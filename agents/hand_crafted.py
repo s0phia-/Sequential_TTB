@@ -2,7 +2,7 @@ import numpy as np
 
 
 class HandCrafted:
-    def __init__(self):
+    def __init__(self, *args):
         pass
 
     def store_data(self, state, state_prime, reward, actions_prime, done):
