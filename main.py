@@ -7,8 +7,9 @@ from agents.RandomTTB import RandomTTB
 from agents.ttb_rollouts import TtbRolloutsCorrelation, TtbRolloutsSummingScore
 from agents.ttb_sequential import TTBFixedWeights
 from agents.ttb_exploit_q import ExploitV
-from agents.state_dependent_ttb import StateDependent
-from run_files import run_ttb_val, run_ttb_q, run_ttb_rollouts, run_simple, pool_run, run_ttb_q_seq
+from agents.q_learning import TDLearning
+from agents.state_dependent_ttb import StateDependentNeedReward, StateDependent
+from run_files import run_ttb_val, run_ttb_q, run_ttb_rollouts, run_simple, pool_run, run_ttb_q_seq, run_v
 
 from datetime import datetime
 import os
@@ -23,13 +24,13 @@ if __name__ == "__main__":
         os.makedirs(results_file)
 
     # create multiprocessing pools
-    pool = mp.Pool(1)  # mp.cpu_count())
+    pool = mp.Pool(mp.cpu_count())
 
     # parameters
-    agents = [[StateDependent, run_simple]]  # agents to try
+    agents = [[RandomTTB, run_simple]]  # agents to try
 
-    number_of_agents = 1  # number of agents to average performance over
-    num_episodes = 10**2
+    number_of_agents = 3  # number of agents to average performance over
+    num_episodes = 10**3
     rows = 8
     cols = 8
 
