@@ -8,7 +8,11 @@ class RandomTTB(TakeTheBestSequential):
         self.beta = np.random.rand(self.num_features)
 
     def learn(self):
-        pass
+        self.beta = np.random.rand(self.num_features)
 
     def store_data(self, *args):
         pass
+
+    def feature_importance(self, *args, **kwargs):
+        feature_importance = np.argsort(np.argsort(self.beta))
+        return feature_importance
