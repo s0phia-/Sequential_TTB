@@ -23,12 +23,13 @@ class TakeTheBestSequential(abc.ABC):
     def store_data(self, *args):
         pass
 
-    def choose_action(self, actions):
+    def choose_action(self, state, actions):
         if random.random() > self.epsilon:
             action_ix = random.choice(range(len(actions)))
             action = actions[action_ix]
         else:
-            action_ix, action = self.ttb_action(self.feature_importance(self.current_state), actions)
+            cue_ordering = self.feature_importance(state)
+            action_ix, action = self.ttb_action(cue_ordering, actions)
         self.current_state = action
         return action_ix
 
@@ -36,9 +37,12 @@ class TakeTheBestSequential(abc.ABC):
     def learn(self):
         pass
 
-    def feature_importance(self, state):
-        feature_importance = np.argsort(np.argsort(self.beta))
-        return feature_importance
+    @abc.abstractmethod
+    def feature_importance(self, *args, **kwargs):
+        pass
+
+    #     feature_importance = np.argsort(np.argsort(self.beta))
+    #     return feature_importance
 
     def ttb_action(self, feature_importance, after_states):
         """
