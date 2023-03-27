@@ -57,17 +57,15 @@ class TDLearning(QLearning):
     """
     Simplest TD learning algorithm
     """
-    def __init__(self, num_features, actions=None):
+    def __init__(self, num_features, actions=None, *args, **kwargs):
         super().__init__(num_features, actions)
-        #self.vv = defaultdict(lambda: 1)
+        self.vv = defaultdict(lambda: 1)
 
-    def vv(self, x):
-        return -4 * x[2] - x[4] - x[5] - x[1] - x[3] + x[6]
+    # def vv(self, x):
+    #     return -4 * x[2] - x[4] - x[5] - x[1] - x[3] + x[6]
 
     def learn(self, state, reward, state_, done):
         state, state_ = tuple(state), tuple(state_)
-        if done:
-            self.vv[state_] = -100
         update = self.alpha * (reward + self.gamma * self.vv[state_] - self.vv[state])
         self.vv[state] += update
 
@@ -83,5 +81,5 @@ class TDLearning(QLearning):
         if random.uniform(0, 1) < self.epsilon:
             action = random.randint(0, len(afterstates)-1)
         else:
-            action = self.argmax([self.vv(a) for a in afterstates])
+            action = self.argmax([self.vv[a] for a in afterstates])
         return action
