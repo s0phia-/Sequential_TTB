@@ -17,7 +17,7 @@ class TakeTheBestSequential(abc.ABC):
         # hyper-parameters
         self.gamma = 0.99  # discount factor
         self.epsilon = 0.9
-        self.alpha = .1
+        self.alpha = 1
 
     @abc.abstractmethod
     def store_data(self, *args):
@@ -40,7 +40,6 @@ class TakeTheBestSequential(abc.ABC):
     @abc.abstractmethod
     def feature_importance(self, *args, **kwargs):
         pass
-
     #     feature_importance = np.argsort(np.argsort(self.beta))
     #     return feature_importance
 
@@ -64,7 +63,6 @@ class TakeTheBestSequential(abc.ABC):
                 break
             else:  # find the next best deciding feature - delete previous best. Only keep after_states which were best
                 after_states = after_states[np.argwhere(feature_values == np.max(feature_values)).flatten()]
-
                 feature_importance[best_feature] = np.nan
         else:
             action_ix = np.random.choice(after_states.shape[0])
@@ -76,10 +74,15 @@ class TakeTheBestSequential(abc.ABC):
 class TTBFixedWeights(TakeTheBestSequential):
     def __init__(self, num_features, current_state):
         super().__init__(num_features, current_state)
-        self.beta = [8, 7, 6, 5, 4, 3, 2, 1]
+        self.beta = [0, 1, 2, 3, 4, 5, 6, 7]
 
     def learn(self):
         pass
 
     def store_data(self, *args):
         pass
+
+    def feature_importance(self, *args, **kwargs):
+
+        feature_importance = np.argsort(np.argsort(np.zeros(self.num_features)))
+        return feature_importance

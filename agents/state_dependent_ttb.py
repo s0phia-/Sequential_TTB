@@ -74,3 +74,33 @@ class StateDependent(TakeTheBestSequential):
         state = tuple(state)
         feature_importance = np.argsort(np.argsort(self.Q[state]))
         return feature_importance
+
+
+class StateIndepentent(TakeTheBestSequential):
+    def __init__(self, num_features, current_state):
+        super().__init__(num_features, current_state)
+        self.cue_values = np.zeros(num_features)
+
+    def learn(self, state, action, reward: int, afterstates: list):
+        """
+        update the state-feature pair values for the present state
+        """
+        afterstates = np.array(afterstates)
+        action = tuple(afterstates[action])  # convert action index to action features
+
+        for i in range(self.num_features):
+
+            # find the highest value of feature i, of all the afterstates
+            max_cue_val = max(afterstates[:, i])
+
+            # if the action actually taken had the (joint) highest value in feature i
+            if action[i] == max_cue_val:
+                self.cue_values[i] += reward
+
+    def store_data(self, *args):
+        pass
+
+    def feature_importance(self, state):
+        feature_importance = np.argsort(np.argsort(self.cue_values))
+        return feature_importance
+

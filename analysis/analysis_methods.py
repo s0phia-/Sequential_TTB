@@ -26,6 +26,7 @@ def get_data(filepath):
                                 'step': csv_data['step'],
                                 'episode': csv_data['episode_number'],
                                 'return': csv_data['return']})
+        pd_data = pd_data[pd_data['episode'] <= 7500]
 
         all_returns = pd.concat([all_returns, pd_data], axis=0)
 

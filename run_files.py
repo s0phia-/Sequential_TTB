@@ -2,6 +2,7 @@ from tetris.game import Tetris
 from chasing_gridworld.chasing_gridworld import ChasingGridWorld, ChasingGridWorldAfterStates
 from chasing_gridworld.simpler_gridworld import SimpleGridworldAfterStates
 import csv
+import numpy as np
 
 
 def results_writer(results_file):
@@ -12,7 +13,7 @@ def results_writer(results_file):
     """
     f = open(results_file, 'w')
     writer = csv.writer(f)
-    writer.writerow(['episode_number', 'step', 'return', 'agent', 'run_id'])
+    writer.writerow(['step', 'return'])
     return f, writer
 
 
@@ -81,14 +82,15 @@ def run_simple(agent, env, num_episodes, writer):
         state = env.get_state()
         while not done:
             # env.print_current_tetromino()  ##
-            after_state_features, _ = env.get_after_states()
-            i = agent.choose_action(state, after_state_features)
-            state, reward, done, cleared_lines = env.step(i)
+            afterstates, _ = env.get_after_states()
+            action = agent.choose_action(state, afterstates)
+            state_, reward, done, cleared_lines = env.step(action)
             step += 1
-            agent.learn()
+            # agent.learn(state, action, reward, afterstates)
             # env.render()  ##
             total_cleared_lines += cleared_lines
             writer.writerow([ep, step, total_cleared_lines])
+            state = state_
             if step > 1000:
                 break
         print(cleared_lines)
@@ -129,14 +131,17 @@ def run_ttb_q_seq(agent, env, num_episodes, writer, skip_learning=1):
     """
     Hello
     """
+    step = 0
+
     for ep in range(num_episodes):
+
         done = False
         total_return = 0
         total_lines_cleared = 0
-        step = 0
+        ep_step = 0
 
         while not done:
-            available_actions, actions_inc_terminal = env.get_after_states(include_terminal=True)
+            available_actions, _ = env.get_after_states(include_terminal=True)
             state = env.get_state()
 
             # if step % skip_learning == 0:
@@ -149,10 +154,15 @@ def run_ttb_q_seq(agent, env, num_episodes, writer, skip_learning=1):
             # action = env.get_action_from_afterstate(action_afterstate)
 
             _, reward, done, lines_cleared = env.step(action)
+            ep_step += 1
             step += 1
+            print(lines_cleared)
+            env.render()
 
-            if step % skip_learning == 0:
-                agent.learn(state, action, reward, available_actions)
+            #  agent.learn(state, action, reward, available_actions)
+
+            if step % 5 == 0:
+                get_performance(agent, 5, writer, step)
 
             total_return += reward
             total_lines_cleared += lines_cleared
@@ -160,16 +170,22 @@ def run_ttb_q_seq(agent, env, num_episodes, writer, skip_learning=1):
             if done:
                 print(total_lines_cleared)
 
-            writer.writerow([ep, step, total_lines_cleared])
-            # if ep % 10**3 == 0:
-            #     save_vv_table(agent.vv, results_path)
-            if step > 1000:
+            #  writer.writerow([ep, step, total_lines_cleared])
+
+            if ep_step > 1000:
                 print(total_lines_cleared)
                 break
         env.reset()
 
 
 def run_q(agent, env, num_episodes, results_path):
+
+    def save_vv_table(learned_v_table, results_path):
+        filepath = f'{results_path}/v_table.csv'
+        with open(filepath, 'w') as f:
+            writer2 = csv.writer(f)
+            for k, v in learned_v_table.items():
+                writer2.writerow([k, v])
 
     # save episode, step and return
     filepath = f'{results_path}/q_learning_returns.csv'
@@ -205,14 +221,6 @@ def run_q(agent, env, num_episodes, results_path):
 
 def run_v(agent, env, num_episodes, writer):
 
-    def save_vv_table(learned_v_table, results_path):
-        filepath = f'{results_path}/v_table.csv'
-        with open(filepath, 'w') as f:
-            writer2 = csv.writer(f)
-            for k, v in learned_v_table.items():
-                writer2.writerow([k, v])
-
-    # value iteration learning loop
     for ep in range(num_episodes):
         done = False
         step = 0
@@ -224,18 +232,43 @@ def run_v(agent, env, num_episodes, writer):
             state_, reward, done, lines_cleared = env.step(afterstate_ix)
             step += 1
             total_lines_cleared += lines_cleared
-
+            agent.learn(state, reward, state_, done)
+            if step % 5 == 0:
+                pass
+                #  get_performance(agent, 5, writer, step)
             if done:
                 print(total_lines_cleared)
-
-            agent.learn(state, reward, state_, done)
-            writer.writerow([ep, step, total_lines_cleared])
-            # if ep % 10**3 == 0:
-            #     save_vv_table(agent.vv, results_path)
             if step > 1000:
                 print(total_lines_cleared)
                 break
         env.reset()
+
+
+def get_performance(agent, num_episodes, writer, step_to_report):
+    """
+    judge performance without learning.
+    """
+    env = Tetris(8, 8, feature_directions=[-1, -1, -1, -1, -1, -1, 1, -1])
+    env.reset()
+    cleared_lines_per_ep = np.zeros(num_episodes)
+    for ep in range(num_episodes):
+        done = False
+        total_cleared_lines = 0
+        step = 0
+        state = env.get_state()
+        while not done:
+            afterstates, _ = env.get_after_states()
+            action = agent.choose_action(state, afterstates)
+            state, reward, done, cleared_lines = env.step(action)
+            step += 1
+            total_cleared_lines += cleared_lines
+            if step > 1000:
+                break
+        env.reset()
+        cleared_lines_per_ep[ep] = total_cleared_lines
+    av_cleared_lines = np.mean(cleared_lines_per_ep)
+    print(step_to_report, av_cleared_lines)
+    writer.writerow([step_to_report, av_cleared_lines])
 
 
 def pool_run(agent_class, i, results_path, num_episodes, rows, cols, play_loop):

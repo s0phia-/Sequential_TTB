@@ -64,7 +64,6 @@ class TtbRolloutsSummingScore(TakeTheBestSequential):
             mean_best_action_values = np.mean(np.take(rollout_returns, ttb_actions_feat_i))
             self.beta[feature_ix] += mean_best_action_values
 
-
         # self.xx = np.r_[self.xx, feature_is_max]
         # self.yy = np.append(self.yy, rollout_returns)
 
@@ -74,20 +73,20 @@ class TtbRolloutsSummingScore(TakeTheBestSequential):
         :param window_size: a moving window so only the most recent data is used
         :return:
         """
-        # x = self.xx
-        # y = self.yy
-        #
-        # # implement moving window
-        # if len(x) > window_size:
-        #     x = x[-window_size:, ]
-        #     y = y[-window_size:, ]
-        #
-        # feature_value = []
-        # for feature_ix in range(self.num_features):
-        #     # sum the rollout outcomes for after_states feature i would have selected using TTB
-        #     sum_tx = np.sum(
-        #         np.take(y, np.argwhere(np.array(x[feature_ix]) == 1).flatten(), axis=0), axis=0)
-        #     feature_value.append(sum_tx)
-        #
-        # self.beta = feature_value
-        pass
+        x = self.xx
+        y = self.yy
+
+        # implement moving window
+        if len(x) > window_size:
+            x = x[-window_size:, ]
+            y = y[-window_size:, ]
+
+        feature_value = []
+        for feature_ix in range(self.num_features):
+            # sum the rollout outcomes for after_states feature i would have selected using TTB
+            sum_tx = np.sum(
+                np.take(y, np.argwhere(np.array(x[feature_ix]) == 1).flatten(), axis=0), axis=0)
+            feature_value.append(sum_tx)
+
+        self.beta = feature_value
+
